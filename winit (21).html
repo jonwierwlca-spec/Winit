@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WinIt">
+<meta name="theme-color" content="#eef0f4">
+<title>WinIt</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#6366f1;
+  --green-dark:#4338ca;
+  --green-dim:#eef2ff;
+  --bg:#eef0f4;
+  --bg2:#e4e7ed;
+  --bg3:#dce0e8;
+  --card:#f4f6f9;
+  --border:#cdd2db;
+  --text:#1a2332;
+  --muted:#7a8799;
+  --danger:#ef4444;
+  --warn:#f59e0b;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px;min-height:100vh}
+
+/* ── Splash ── */
+.splash{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center}
+.splash.active{display:flex}
+.splash-logo{font-size:52px;font-weight:800;letter-spacing:-2px;margin-bottom:8px}
+.splash-logo span{color:var(--green)}
+.splash-tag{font-size:16px;color:var(--muted);margin-bottom:48px;line-height:1.5;max-width:280px}
+.splash-feature{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;text-align:left;background:var(--bg2);border-radius:12px;padding:14px 16px}
+.splash-icon{font-size:22px;min-width:32px;text-align:center}
+.splash-feature-text strong{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.splash-feature-text span{font-size:13px;color:var(--muted);line-height:1.4}
+.btn-primary{width:100%;padding:17px;font-size:16px;font-weight:700;background:var(--green);color:#f4f6f9;border:none;border-radius:14px;cursor:pointer;margin-top:8px;letter-spacing:.3px}
+.btn-primary:active{opacity:.85}
+.btn-ghost{width:100%;padding:14px;font-size:14px;font-weight:600;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:14px;cursor:pointer;margin-top:10px}
+
+/* ── Onboarding ── */
+.onboard{display:none;min-height:100vh;padding:env(safe-area-inset-top) 0 0}
+.onboard.active{display:block}
+.ob-header{padding:20px 24px 0;display:flex;align-items:center;gap:12px}
+.ob-back{font-size:22px;color:var(--muted);cursor:pointer;background:none;border:none;padding:4px}
+.ob-logo-sm{font-size:18px;font-weight:800;letter-spacing:-1px}
+.ob-logo-sm span{color:var(--green)}
+.ob-body{padding:32px 24px 40px}
+.ob-step{display:none}.ob-step.active{display:block}
+.ob-dots{display:flex;gap:6px;margin-bottom:28px}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.ob-dot.on{background:var(--green);width:18px;border-radius:3px}
+.ob-title{font-size:28px;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}
+.ob-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.ob-field{margin-bottom:20px}
+.ob-field label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px}
+.ob-field input,.ob-field select{width:100%;padding:15px 16px;font-size:18px;font-weight:500;border:1.5px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--text);outline:none;appearance:none;-webkit-appearance:none}
+.ob-field input:focus,.ob-field select:focus{border-color:var(--green)}
+.ob-field input::placeholder{color:var(--muted)}
+.ob-hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
+.ob-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ob-goal-preview{background:var(--green-dim);border:1px solid var(--green-dark);border-radius:12px;padding:14px 16px;margin-bottom:20px;display:none}
+.ob-goal-preview strong{display:block;font-size:15px;font-weight:700;color:var(--green);margin-bottom:2px}
+.ob-goal-preview span{font-size:13px;color:var(--muted)}
+
+/* ── Main App ── */
+.main-app{display:none}.main-app.active{display:block}
+.app{max-width:480px;margin:0 auto;padding:0 12px;padding-bottom:calc(20px + env(safe-area-inset-bottom));padding-top:calc(8px + env(safe-area-inset-top))}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0 8px}
+.topbar-logo{font-size:20px;font-weight:800;letter-spacing:-1px}
+.topbar-logo span{color:var(--green)}
+.topbar-streak{font-size:13px;color:#64748b;display:flex;align-items:center;gap:4px}
+
+/* tabs */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:14px;background:var(--bg2);border-radius:12px;padding:4px}
+.tab{padding:9px 4px;font-size:12px;font-weight:600;border:none;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;text-align:center;letter-spacing:.2px}
+.tab.active{background:var(--green);color:#f4f6f9}
+
+.view{display:none}.view.active{display:block}
+
+/* cards */
+.card{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--bg2);border-radius:10px;padding:12px 8px;text-align:center;border:1px solid var(--border)}
+.stat-label{font-size:10px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.stat-val{font-size:22px;font-weight:700}
+.good{color:var(--green)}.warn{color:var(--warn)}.bad{color:var(--danger)}
+
+/* bars */
+.bar-track{height:10px;background:var(--bg2);border-radius:5px;overflow:hidden;margin:6px 0 8px;border:1px solid var(--border)}
+.bar-fill{height:100%;border-radius:5px;transition:width .5s;background:var(--green)}
+.bar-fill.warn{background:var(--warn)}.bar-fill.bad{background:var(--danger)}
+
+/* inputs */
+.input-row{display:grid;gap:10px;margin-bottom:12px}
+.input-group label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:6px}
+.input-group input{width:100%;padding:12px 14px;font-size:18px;font-weight:600;border:1.5px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);outline:none}
+.input-group input:focus{border-color:var(--green)}
+.input-group input::placeholder{color:var(--muted);font-weight:400}
+.save-btn{width:100%;padding:14px;font-size:15px;font-weight:700;background:var(--green);color:#f4f6f9;border:none;border-radius:12px;cursor:pointer;letter-spacing:.3px}
+.save-btn:active{opacity:.85}
+.btn-sec{background:var(--bg2);color:var(--text);border:1px solid var(--border);font-weight:600;font-size:14px;padding:12px;border-radius:10px;cursor:pointer;width:100%;margin-bottom:8px}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+
+/* history week cells */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day-cell{border-radius:7px;padding:6px 2px;min-height:72px;display:flex;flex-direction:column;align-items:center;background:var(--bg2);text-align:center;border:1px solid var(--border)}
+.day-cell.today{border:1.5px solid var(--green)}
+.day-cell.good{background:var(--green-dim);border-color:var(--green-dark)}
+.day-cell.bad{background:#fef2f2;border-color:#fca5a5}
+.day-cell.future{opacity:.2}
+.day-cell .d-day{font-size:9px;color:var(--muted);margin-bottom:1px;font-weight:600}
+.day-cell .d-wt{font-size:13px;font-weight:700;color:var(--text)}
+.day-cell .d-cal{font-size:10px;color:var(--muted)}
+.day-cell .d-und{font-size:10px}
+
+/* progress bar labels */
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px}
+
+/* BMI */
+.bmi-rainbow{position:relative;height:16px;border-radius:8px;overflow:hidden;margin:10px 0 4px;background:linear-gradient(to right,#3b6fd4 0%,#3b6fd4 11.7%,#6366f1 11.7%,#6366f1 33.3%,#e0a030 33.3%,#e0a030 50%,#e05555 50%,#e05555 100%)}
+.bmi-needle{position:absolute;top:0;width:3px;height:100%;background:#fff;border-radius:2px;transition:left .5s;transform:translateX(-50%)}
+.bmi-seg-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:10px}
+.bmi-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.bmi-badge.under{background:#1a2e5a;color:#7aabf0}
+.bmi-badge.normal{background:var(--green-dim);color:var(--green)}
+.bmi-badge.over{background:#3a2a00;color:var(--warn)}
+.bmi-badge.obese{background:#fef2f2;color:var(--danger)}
+.bmi-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
+.bmi-row:last-child{border-bottom:none}
+.bmi-row span:last-child{font-weight:600;color:var(--text)}
+
+/* hero metric */
+.hero{text-align:center;padding:8px 0 16px}
+.hero-num{font-size:56px;font-weight:800;color:var(--green);letter-spacing:-2px;line-height:1}
+.hero-label{font-size:13px;color:var(--muted);margin-top:4px;font-weight:500}
+
+/* weekly summary row */
+.week-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.wk-s{text-align:center;background:var(--bg2);border-radius:8px;padding:10px 4px;border:1px solid var(--border)}
+.wk-s-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.wk-s-val{font-size:16px;font-weight:700;margin-top:3px}
+
+/* notice */
+.notice{background:var(--green-dim);border:1px solid var(--green-dark);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:12px;display:none;font-weight:500}
+.notice.show{display:block}
+.notice.err{background:#fef2f2;border-color:#fca5a5;color:var(--danger)}
+
+/* settings */
+.sg{margin-bottom:16px}
+.sg label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:7px}
+.sg input,.sg select{width:100%;padding:11px 14px;font-size:15px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);outline:none;appearance:none;-webkit-appearance:none}
+.sg input:focus{border-color:var(--green)}
+.half-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* tip jar */
+.tip-card{background:linear-gradient(135deg,var(--green-dim),var(--bg3));border:1px solid var(--green-dark);border-radius:14px;padding:18px;margin-bottom:12px;text-align:center}
+.tip-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.tip-card p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.tip-btn{display:inline-block;padding:11px 28px;background:var(--green);color:#f4f6f9;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;border:none}
+.share-btn{display:block;width:100%;padding:13px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-weight:600;font-size:14px;cursor:pointer;margin-top:8px;text-align:center}
+
+/* motivation modal */
+.motiv-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+.motiv-overlay.open{display:flex}
+.motiv-card{background:var(--bg2);border-radius:24px;padding:36px 28px;width:100%;max-width:400px;text-align:center;border:1px solid var(--green-dark);position:relative}
+.motiv-emoji{font-size:52px;margin-bottom:16px;line-height:1}
+.motiv-days{font-size:64px;font-weight:800;color:var(--green);letter-spacing:-2px;line-height:1;margin-bottom:4px}
+.motiv-days-label{font-size:15px;color:var(--muted);margin-bottom:20px;font-weight:500}
+.motiv-statement{font-size:18px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:8px}
+.motiv-sub{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:28px}
+.motiv-close{width:100%;padding:15px;font-size:16px;font-weight:700;background:var(--green);color:#f4f6f9;border:none;border-radius:14px;cursor:pointer}
+.motiv-close:active{opacity:.85}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:999;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;border-top:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.modal-date{font-size:13px;color:var(--muted);margin-bottom:20px}
+.modal-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.modal-field label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:6px}
+.modal-field input{width:100%;padding:12px 14px;font-size:17px;font-weight:600;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);outline:none}
+.modal-field input:focus{border-color:var(--green)}
+.modal-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-save{padding:14px;font-size:15px;font-weight:700;background:var(--green);color:#f4f6f9;border:none;border-radius:12px;cursor:pointer}
+.modal-cancel{padding:14px;font-size:15px;font-weight:600;background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:12px;cursor:pointer}
+.day-cell{cursor:pointer}.day-cell:active{opacity:.7}
+</style>
+</head>
+<body>
+
+<!-- ═══════ SPLASH ═══════ -->
+<div class="splash" id="splash">
+  <div>
+    <div class="splash-logo">Win<span>It</span></div>
+    <div class="splash-tag">LoseIt tells you what you ate.<br>WinIt tells you <em>when</em> you're going to win.</div>
+  </div>
+  <div style="width:100%;max-width:380px">
+    <div class="splash-feature">
+      <div class="splash-icon">🔥</div>
+      <div class="splash-feature-text">
+        <strong>Your weekly net calories are what actually matter</strong>
+        <span>Daily calories bounce around — one bad day doesn't mean failure. What matters is your total net calories across the whole week — food eaten minus calories burned. That number predicts your weight loss. WinIt makes it impossible to ignore.</span>
+      </div>
+    </div>
+    <div class="splash-feature">
+      <div class="splash-icon">📱</div>
+      <div class="splash-feature-text">
+        <strong>Works alongside LoseIt</strong>
+        <span>Keep logging food in LoseIt as normal. Each morning, open WinIt to enter your weight and yesterday's net calories. Takes 30 seconds.</span>
+      </div>
+    </div>
+    <div class="splash-feature">
+      <div class="splash-icon">🎯</div>
+      <div class="splash-feature-text">
+        <strong>See the finish line</strong>
+        <span>WinIt takes your pace and tells you the actual date you'll hit your goal weight — and updates it every day based on how you're really doing.</span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="startSetup()" style="margin-top:24px">Get started →</button>
+    <button class="btn-ghost" onclick="showApp()" style="font-size:13px">Already set up? Open app</button>
+  </div>
+</div>
+
+<!-- ═══════ ONBOARDING ═══════ -->
+<div class="onboard" id="onboard">
+  <div class="ob-header">
+    <button class="ob-back" id="ob-back-btn" onclick="obBack()" style="display:none">←</button>
+    <div class="ob-logo-sm">Win<span>It</span></div>
+  </div>
+  <div class="ob-body">
+
+    <div class="ob-step active" id="ob-1">
+      <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+      <div class="ob-title">About you</div>
+      <div class="ob-sub">This stays on your device. Nobody else sees it.</div>
+      <div class="ob-field">
+        <label>Your name</label>
+        <input type="text" id="ob-name" placeholder="First name" autocomplete="off">
+      </div>
+      <div class="ob-field">
+        <label>Height</label>
+        <div class="ob-2col">
+          <div><input type="number" id="ob-ft" placeholder="Feet" inputmode="numeric"><div class="ob-hint" style="margin-top:5px">Feet</div></div>
+          <div><input type="number" id="ob-in" placeholder="Inches" inputmode="numeric"><div class="ob-hint" style="margin-top:5px">Inches</div></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="obNext(1)">Continue →</button>
+    </div>
+
+    <div class="ob-step" id="ob-2">
+      <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div></div>
+      <div class="ob-title">Your goal</div>
+      <div class="ob-sub">Where are you now, and where do you want to be?</div>
+      <div class="ob-field">
+        <label>Current weight (lbs)</label>
+        <input type="number" id="ob-curr" placeholder="e.g. 230" step="0.1" inputmode="decimal" oninput="calcGoalDate()">
+      </div>
+      <div class="ob-field">
+        <label>Goal weight (lbs)</label>
+        <input type="number" id="ob-goal" placeholder="e.g. 180" step="0.1" inputmode="decimal" oninput="calcGoalDate()">
+      </div>
+      <div class="ob-field">
+        <label>Weekly loss target</label>
+        <select id="ob-rate" onchange="calcGoalDate()">
+          <option value="0.5">0.5 lbs / week — slow &amp; steady</option>
+          <option value="1" selected>1 lb / week — recommended</option>
+          <option value="1.5">1.5 lbs / week — aggressive</option>
+          <option value="2">2 lbs / week — max safe rate</option>
+        </select>
+      </div>
+      <div class="ob-goal-preview" id="ob-goal-preview">
+        <strong id="ob-goal-date-text">—</strong>
+        <span id="ob-goal-weeks-text">—</span>
+      </div>
+      <input type="hidden" id="ob-goaldate">
+      <button class="btn-primary" onclick="obNext(2)">Continue →</button>
+    </div>
+
+    <div class="ob-step" id="ob-3">
+      <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div></div>
+      <div class="ob-title">LoseIt settings</div>
+      <div class="ob-sub">Your weekly target for total "Calories under budget" added up across all 7 days. Exercise counts — a workout day means a bigger number.</div>
+      <div class="ob-field">
+        <label>Weekly Under Goal</label>
+        <input type="number" id="ob-wkgoal" placeholder="e.g. 5000" inputmode="numeric">
+        <div class="ob-hint">The sum of your "Calories under budget" from each day across the whole week. In LoseIt, check each day's Log → tap the Under circle → "Calories under budget." Add those numbers up for a typical week to set your goal.</div>
+      </div>
+      <div class="ob-field">
+        <label>When did you start?</label>
+        <input type="date" id="ob-startdate">
+        <div class="ob-hint">The first day you started tracking in LoseIt</div>
+      </div>
+      <button class="btn-primary" onclick="obFinish()">Start tracking →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ MAIN APP ═══════ -->
+<div class="main-app" id="main-app">
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-logo">Win<span>It</span></div>
+    <div class="topbar-streak" id="streak-display"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('today')">Today</div>
+    <div class="tab" onclick="switchTab('calendar')">Calendar</div>
+    <div class="tab" onclick="switchTab('progress')">Progress</div>
+    <div class="tab" onclick="switchTab('settings')">Settings</div>
+  </div>
+  <div id="notice" class="notice"></div>
+
+  <!-- TODAY -->
+  <div id="view-today" class="view active">
+    <div class="card" style="text-align:center;padding:20px 16px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Days to your goal</div>
+      <div style="font-size:72px;font-weight:800;color:var(--green);letter-spacing:-3px;line-height:1" id="hero-days">—</div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-top:4px;margin-bottom:16px" id="hero-goaldate">—</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px">
+        <span>Weekly under budget</span><span id="wk-nums">—</span>
+      </div>
+      <div class="bar-track" style="height:12px"><div class="bar-fill bad" id="wk-bar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+        <span>0</span><span id="wk-goal-lbl">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="today-label">Log your morning</div>
+      <div class="stats" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat"><div class="stat-label">Cals</div><div class="stat-val" id="s-cals">—</div></div>
+        <div class="stat"><div class="stat-label">Net Cals</div><div class="stat-val" id="s-net">—</div></div>
+        <div class="stat"><div class="stat-label">Under</div><div class="stat-val good" id="s-under">—</div></div>
+        <div class="stat"><div class="stat-label">Weight</div><div class="stat-val" id="s-wt">—</div></div>
+      </div>
+      <div class="input-row" style="grid-template-columns:1fr 1fr">
+        <div class="input-group"><label>Yesterday's cals eaten</label><input type="number" id="in-cals" placeholder="0" inputmode="numeric"></div>
+        <div class="input-group"><label>Yesterday's net cals</label><input type="number" id="in-net" placeholder="0" inputmode="numeric"></div>
+      </div>
+      <div class="input-row" style="grid-template-columns:1fr 1fr">
+        <div class="input-group"><label>Yesterday's under budget</label><input type="number" id="in-under" placeholder="0" inputmode="numeric"></div>
+        <div class="input-group"><label>Today's weight</label><input type="number" id="in-wt" placeholder="0.0" step="0.1" inputmode="decimal"></div>
+      </div>
+
+      <div style="margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-size:11px;color:var(--muted);font-weight:600">OR SCAN WITH LIVE TEXT</span>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+        <textarea id="scan-paste" placeholder="📋 In LoseIt, take a screenshot → hold your finger on the numbers → tap Copy → paste here" style="width:100%;padding:10px 12px;font-size:13px;border:1.5px dashed var(--border);border-radius:10px;background:var(--bg2);color:var(--text);min-height:60px;resize:none;font-family:system-ui" oninput="parsePastedText(this.value)"></textarea>
+        <div id="scan-status" style="display:none;font-size:12px;text-align:center;padding:6px 8px;border-radius:8px;margin-top:6px"></div>
+      </div>
+
+      <button class="save-btn" onclick="saveToday()">Save</button>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHelp()">
+        <span style="font-size:13px;font-weight:700;color:var(--green)">📖 Where to find these numbers in LoseIt</span>
+        <span style="font-size:18px;color:var(--muted)" id="help-chevron">﹢</span>
+      </div>
+      <div id="help-body" style="display:none;margin-top:14px">
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px">
+          <strong style="color:var(--text);display:block;margin-bottom:6px">Why it matters</strong>
+          Daily calories bounce around — one rough day isn't failure. What predicts weight loss is your <strong style="color:var(--green)">total net calories across the whole week</strong>. That's the number WinIt tracks.
+        </div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px">
+          <strong style="color:var(--text);display:block;margin-bottom:6px">How to find it in LoseIt</strong>
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+            <span style="background:var(--green);color:#f4f6f9;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">1</span>
+            <span>Open LoseIt and tap the <strong style="color:var(--text)">Log</strong> tab at the bottom</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+            <span style="background:var(--green);color:#f4f6f9;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">2</span>
+            <span>Tap the <strong style="color:var(--green)">Under</strong> number in the circle at the top</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+            <span style="background:var(--green);color:#f4f6f9;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">3</span>
+            <span>Look for <strong style="color:var(--green)">"Calories under budget"</strong> at the bottom of the breakdown — that's your number. It already includes any exercise calories.</span>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);border:1px solid var(--border)">
+          💡 <strong style="color:var(--text)">Tip:</strong> Enter yesterday's number each morning before you start logging today. Takes 10 seconds.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end view-today -->
+
+  <!-- CALENDAR -->
+  <div id="view-calendar" class="view">
+    <div class="card" style="padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <button onclick="calPrev()" style="background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px 8px">‹</button>
+        <div style="font-size:16px;font-weight:700" id="cal-month-label">—</div>
+        <button onclick="calNext()" style="background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px 8px">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr) 44px;gap:2px;margin-bottom:4px">
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">M</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">T</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">W</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">T</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">F</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">S</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding-bottom:4px">S</div>
+        <div style="text-align:center;font-size:10px;font-weight:700;color:var(--green);padding-bottom:4px">WK</div>
+      </div>
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr) 44px;gap:3px"></div>
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:var(--green-dim);border:1px solid var(--green-dark)"></div>Logged</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:#fef2f2;border:1px solid #fca5a5"></div>Over</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:var(--bg2);border:1px solid var(--border)"></div>Empty</div>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0" id="cal-month-stats-label">This month</div>
+        <div style="font-size:12px;color:var(--green);font-weight:700" id="cal-month-under">—</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div style="background:var(--bg2);border-radius:8px;padding:10px 8px;text-align:center;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Days logged</div>
+          <div style="font-size:20px;font-weight:700" id="cal-days-logged">—</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:10px 8px;text-align:center;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Avg cals</div>
+          <div style="font-size:20px;font-weight:700" id="cal-avg-cals">—</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:8px;padding:10px 8px;text-align:center;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Wt change</div>
+          <div style="font-size:20px;font-weight:700" id="cal-wt-change">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="view-progress" class="view">
+    <div class="card">
+      <div class="card-title">Weight progress</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Lost</div><div class="stat-val good" id="p-lost">—</div></div>
+        <div class="stat"><div class="stat-label">Current</div><div class="stat-val" id="p-curr">—</div></div>
+        <div class="stat"><div class="stat-label">To go</div><div class="stat-val" id="p-togo">—</div></div>
+      </div>
+      <div class="prog-labels"><span id="p-s-lbl">—</span><span id="p-pct">0%</span><span id="p-g-lbl">—</span></div>
+      <div class="bar-track" style="height:14px"><div class="bar-fill" id="p-bar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:10px">
+        <span>Goal date</span><span id="p-goaldate" style="color:var(--text);font-weight:600">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px">
+        <span>At your current pace</span><span id="p-projected" style="color:var(--green);font-weight:600">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px">
+        <span>Average weekly loss</span><span id="p-avg-loss" style="color:var(--text);font-weight:600">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">BMI</div>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px">
+        <div style="font-size:42px;font-weight:800;letter-spacing:-1px" id="bmi-val">—</div>
+        <div id="bmi-badge"></div>
+      </div>
+      <div class="bmi-rainbow"><div class="bmi-needle" id="bmi-needle" style="left:12%"></div></div>
+      <div class="bmi-seg-labels"><span>Under<br><span style="color:var(--text)">18.5</span></span><span>Normal<br><span style="color:var(--text)">25</span></span><span>Over<br><span style="color:var(--text)">30</span></span><span>Obese</span></div>
+      <div class="bmi-row"><span>Healthy weight for your height</span><span id="bmi-healthy">—</span></div>
+      <div class="bmi-row"><span>BMI at goal weight</span><span id="bmi-at-goal">—</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent weights</div>
+      <div id="weight-hist"><span style="color:var(--muted);font-size:13px">No entries yet</span></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="view-settings" class="view">
+
+    <div class="tip-card">
+      <h3>☕ Like WinIt?</h3>
+      <p>This app is free. If it's helping you hit your goals, a tip keeps the coffee flowing and the updates coming.</p>
+      <button class="tip-btn" onclick="openTip()">Buy me a coffee</button>
+      <button class="share-btn" onclick="shareApp()">📤 Share WinIt with a friend</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your info</div>
+      <div class="sg"><label>Name</label><input type="text" id="set-name" autocomplete="off"></div>
+      <div class="sg"><label>Height</label>
+        <div class="half-row">
+          <input type="number" id="set-ft" placeholder="Feet" inputmode="numeric">
+          <input type="number" id="set-in" placeholder="Inches" inputmode="numeric">
+        </div>
+      </div>
+      <div class="card-title" style="margin-top:4px">Weight goal</div>
+      <div class="half-row" style="margin-bottom:14px">
+        <div class="sg" style="margin-bottom:0"><label>Start weight</label><input type="number" id="set-start" step="0.1" inputmode="decimal"></div>
+        <div class="sg" style="margin-bottom:0"><label>Goal weight</label><input type="number" id="set-goal" step="0.1" inputmode="decimal"></div>
+      </div>
+      <div class="sg"><label>Goal date</label><input type="date" id="set-goaldate"></div>
+      <div class="card-title" style="margin-top:4px">LoseIt settings</div>
+      <div class="sg"><label>Weekly Under Goal</label><input type="number" id="set-wkgoal" inputmode="numeric"></div>
+      <div class="sg"><label>Start date</label><input type="date" id="set-startdate"></div>
+      <button class="save-btn" onclick="saveSettings()" style="margin-bottom:0">Save settings</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Import &amp; export</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5">Import your 2026 health spreadsheet data — 364 days of weights, calories, and under budget numbers loaded instantly.</p>
+      <button class="btn-sec" onclick="importSpreadsheet()" style="margin-bottom:8px">📥 Import spreadsheet data</button>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Or import a WinIt backup JSON file you previously exported.</p>
+      <label style="display:block;width:100%;padding:12px;font-size:14px;font-weight:600;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;margin-bottom:8px">
+        📂 Import backup JSON
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this)">
+      </label>
+      <button class="btn-sec" onclick="exportData()">📤 Export backup</button>
+    </div>
+      <button class="btn-sec" onclick="document.getElementById('main-app').classList.remove('active');document.getElementById('splash').classList.add('active')">About WinIt</button>
+      <button class="btn-sec btn-danger" onclick="resetAll()">Reset everything</button>
+    </div>
+  </div>
+
+</div>
+</div><!-- MOTIVATION MODAL -->
+<div class="motiv-overlay" id="motiv-modal">
+  <div class="motiv-card">
+    <div class="motiv-emoji" id="motiv-emoji">🎯</div>
+    <div class="motiv-statement" id="motiv-statement">You're doing great!</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px">You will hit your goal on</div>
+    <div class="motiv-days" id="motiv-days" style="font-size:28px;letter-spacing:-1px;margin-bottom:4px">—</div>
+    <div class="motiv-days-label" id="motiv-days-label" style="margin-bottom:16px">—</div>
+    <div class="motiv-sub" id="motiv-sub"></div>
+    <button class="motiv-close" onclick="document.getElementById('motiv-modal').classList.remove('open')">Let's go →</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal" onclick="closeEdit(event)">
+  <div class="modal">
+    <div class="modal-title">Edit entry</div>
+    <div class="modal-date" id="edit-date-label">—</div>
+    <div class="modal-fields">
+      <div class="modal-field"><label>Cals eaten</label><input type="number" id="edit-cals" placeholder="0" inputmode="numeric"></div>
+      <div class="modal-field"><label>Net cals</label><input type="number" id="edit-net" placeholder="0" inputmode="numeric"></div>
+      <div class="modal-field"><label>Under budget</label><input type="number" id="edit-under" placeholder="0" inputmode="numeric"></div>
+      <div class="modal-field"><label>Weight (lbs)</label><input type="number" id="edit-wt" placeholder="0.0" step="0.1" inputmode="decimal"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="modal-save" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SPREADSHEET_DATA = {"2026-01-05": {"wt": 233.0, "cals": 1386, "under": 461}, "2026-01-06": {"wt": 232.0, "cals": 1055, "under": 781}, "2026-01-07": {"wt": 232.8, "cals": 1203, "under": 633}, "2026-01-08": {"wt": 232.2, "cals": 1241, "under": 601}, "2026-01-09": {"wt": 231.7, "cals": 1569, "under": 770}, "2026-01-10": {"wt": 231.3, "cals": 1569, "under": 767}, "2026-01-11": {"wt": 230.8, "cals": 1987, "under": 349}, "2026-01-12": {"wt": 231.0, "cals": 1372, "under": 462}, "2026-01-13": {"wt": 229.0, "cals": 1325, "under": 503}, "2026-01-14": {"wt": 229.0, "cals": 1403, "under": 519}, "2026-01-15": {"wt": 230.0, "cals": 1290, "under": 835}, "2026-01-16": {"wt": 230.0, "cals": 1340, "under": 1052}, "2026-01-17": {"wt": 230.0, "cals": 1553, "under": 788}, "2026-01-18": {"wt": 229.0, "cals": 1844, "under": 484}, "2026-01-19": {"wt": 229.0, "cals": 1274, "under": 554}, "2026-01-20": {"wt": 229.0, "cals": 1588, "under": 240}, "2026-01-21": {"wt": 229.0, "cals": 1471, "under": 357}, "2026-01-22": {"wt": 230.0, "cals": 1692, "under": 136}, "2026-01-23": {"wt": 230.0, "cals": 1441, "under": 887}, "2026-01-24": {"wt": 230.0, "cals": 1317, "under": 1011}, "2026-01-25": {"wt": 227.0, "cals": 1328, "under": 994}, "2026-01-26": {"wt": 227.0, "cals": 994, "under": 829}, "2026-01-27": {"wt": 227.0, "cals": 1290, "under": 533}, "2026-01-28": {"wt": 226.0, "cals": 1351, "under": 472}, "2026-01-29": {"wt": 226.0, "cals": 1240, "under": 583}, "2026-01-30": {"wt": 225.8, "cals": 1561, "under": 758}, "2026-01-31": {"wt": 225.6, "cals": 2128, "under": 191}, "2026-02-01": {"wt": 224.6, "cals": 1804, "under": 511}, "2026-02-02": {"wt": 227.0, "cals": 1158, "under": 659}, "2026-02-03": {"wt": 227.0, "cals": 926, "under": 891}, "2026-02-04": {"wt": 227.0, "cals": 1001, "under": 880}, "2026-02-05": {"wt": 227.0, "cals": 895, "under": 922}, "2026-02-06": {"wt": 227.0, "cals": 1093, "under": 1222}, "2026-02-07": {"wt": 227.0, "cals": 1556, "under": 751}, "2026-02-08": {"wt": 225.0, "cals": 1606, "under": 701}, "2026-02-09": {"wt": 226.0, "cals": 994, "under": 818}, "2026-02-10": {"wt": 225.2, "cals": 922, "under": 899}, "2026-02-11": {"wt": 224.4, "cals": 867, "under": 944}, "2026-02-12": {"wt": 223.4, "cals": 990, "under": 820}, "2026-02-13": {"wt": 222.8, "cals": 1241, "under": 1049}, "2026-02-14": {"wt": 222.7, "cals": 1422, "under": 878}, "2026-02-15": {"wt": 222.0, "cals": 1223, "under": 1071}, "2026-02-16": {"wt": 224.0, "cals": 616, "under": 1185}, "2026-02-17": {"wt": 222.0, "cals": 854, "under": 947}, "2026-02-18": {"wt": 221.8, "cals": 768, "under": 1033}, "2026-02-19": {"wt": 223.0, "cals": 1075, "under": 726}, "2026-02-20": {"wt": 222.0, "cals": 1294, "under": 1000}, "2026-02-21": {"wt": 221.1, "cals": 1233, "under": 1061}, "2026-02-22": {"wt": 220.3, "cals": 1357, "under": 937}, "2026-02-23": {"wt": 221.0, "cals": 1193, "under": 608}, "2026-02-24": {"wt": 220.8, "cals": 729, "under": 1032}, "2026-02-25": {"wt": 219.8, "cals": 1083, "under": 706}, "2026-02-26": {"cals": 1022, "under": 767}, "2026-02-27": {"cals": 468, "under": 1811}, "2026-02-28": {"cals": 2215, "under": 87}, "2026-03-01": {"cals": 1617, "under": 662}, "2026-03-02": {"cals": 997, "under": 792}, "2026-03-03": {"cals": 1132, "under": 649}, "2026-03-04": {"cals": 762, "under": 1014}, "2026-03-05": {"cals": 596, "under": 1180}, "2026-03-06": {"cals": 1055, "under": 1201}, "2026-03-07": {"cals": 1822, "under": 433}, "2026-03-08": {"cals": 1717, "under": 538}, "2026-03-09": {"cals": 1184, "under": 584}, "2026-03-10": {"cals": 577, "under": 1193}, "2026-03-11": {"cals": 1100, "under": 700}, "2026-03-12": {"cals": 1060, "under": 710}, "2026-03-13": {"cals": 900, "under": 1355}, "2026-03-14": {"cals": 1165, "under": 1090}, "2026-03-15": {"cals": 1469, "under": 786}, "2026-03-16": {"cals": 1770}, "2026-03-17": {"cals": 1543, "under": 227}, "2026-03-18": {"cals": 712, "under": 1145}, "2026-03-19": {"cals": 1105, "under": 834}, "2026-03-20": {"cals": 1439, "under": 886}, "2026-03-21": {"cals": 1943, "under": 507}, "2026-03-22": {}, "2026-03-23": {}, "2026-03-24": {}, "2026-03-25": {}, "2026-03-26": {}, "2026-03-27": {}, "2026-03-28": {}, "2026-03-29": {}, "2026-03-30": {}, "2026-03-31": {}, "2026-04-01": {}, "2026-04-02": {}, "2026-04-03": {}, "2026-04-04": {}, "2026-04-05": {}, "2026-04-06": {}, "2026-04-07": {}, "2026-04-08": {}, "2026-04-09": {}, "2026-04-10": {}, "2026-04-11": {}, "2026-04-12": {}, "2026-04-13": {}, "2026-04-14": {}, "2026-04-15": {}, "2026-04-16": {}, "2026-04-17": {}, "2026-04-18": {}, "2026-04-19": {}, "2026-04-20": {}, "2026-04-21": {}, "2026-04-22": {}, "2026-04-23": {}, "2026-04-24": {}, "2026-04-25": {}, "2026-04-26": {}, "2026-04-27": {}, "2026-04-28": {}, "2026-04-29": {}, "2026-04-30": {}, "2026-05-01": {}, "2026-05-02": {}, "2026-05-03": {}, "2026-05-04": {}, "2026-05-05": {}, "2026-05-06": {}, "2026-05-07": {}, "2026-05-08": {}, "2026-05-09": {}, "2026-05-10": {}, "2026-05-11": {}, "2026-05-12": {}, "2026-05-13": {}, "2026-05-14": {}, "2026-05-15": {}, "2026-05-16": {}, "2026-05-17": {}, "2026-05-18": {}, "2026-05-19": {}, "2026-05-20": {}, "2026-05-21": {}, "2026-05-22": {}, "2026-05-23": {}, "2026-05-24": {}, "2026-05-25": {}, "2026-05-26": {}, "2026-05-27": {}, "2026-05-28": {}, "2026-05-29": {}, "2026-05-30": {}, "2026-05-31": {}, "2026-06-01": {}, "2026-06-02": {}, "2026-06-03": {}, "2026-06-04": {}, "2026-06-05": {}, "2026-06-06": {}, "2026-06-07": {}, "2026-06-08": {}, "2026-06-09": {}, "2026-06-10": {}, "2026-06-11": {}, "2026-06-12": {}, "2026-06-13": {}, "2026-06-14": {}, "2026-06-15": {}, "2026-06-16": {}, "2026-06-17": {}, "2026-06-18": {}, "2026-06-19": {}, "2026-06-20": {}, "2026-06-21": {}, "2026-06-22": {}, "2026-06-23": {}, "2026-06-24": {}, "2026-06-25": {}, "2026-06-26": {}, "2026-06-27": {}, "2026-06-28": {}, "2026-06-29": {}, "2026-06-30": {}, "2026-07-01": {}, "2026-07-02": {}, "2026-07-03": {}, "2026-07-04": {}, "2026-07-05": {}, "2026-07-06": {}, "2026-07-07": {}, "2026-07-08": {}, "2026-07-09": {}, "2026-07-10": {}, "2026-07-11": {}, "2026-07-12": {}, "2026-07-13": {}, "2026-07-14": {}, "2026-07-15": {}, "2026-07-16": {}, "2026-07-17": {}, "2026-07-18": {}, "2026-07-19": {}, "2026-07-20": {}, "2026-07-21": {}, "2026-07-22": {}, "2026-07-23": {}, "2026-07-24": {}, "2026-07-25": {}, "2026-07-26": {}, "2026-07-27": {}, "2026-07-28": {}, "2026-07-29": {}, "2026-07-30": {}, "2026-07-31": {}, "2026-08-01": {}, "2026-08-02": {}, "2026-08-03": {}, "2026-08-04": {}, "2026-08-05": {}, "2026-08-06": {}, "2026-08-07": {}, "2026-08-08": {}, "2026-08-09": {}, "2026-08-10": {}, "2026-08-11": {}, "2026-08-12": {}, "2026-08-13": {}, "2026-08-14": {}, "2026-08-15": {}, "2026-08-16": {}, "2026-08-17": {}, "2026-08-18": {}, "2026-08-19": {}, "2026-08-20": {}, "2026-08-21": {}, "2026-08-22": {}, "2026-08-23": {}, "2026-08-24": {}, "2026-08-25": {}, "2026-08-26": {}, "2026-08-27": {}, "2026-08-28": {}, "2026-08-29": {}, "2026-08-30": {}, "2026-08-31": {}, "2026-09-01": {}, "2026-09-02": {}, "2026-09-03": {}, "2026-09-04": {}, "2026-09-05": {}, "2026-09-06": {}, "2026-09-07": {}, "2026-09-08": {}, "2026-09-09": {}, "2026-09-10": {}, "2026-09-11": {}, "2026-09-12": {}, "2026-09-13": {}, "2026-09-14": {}, "2026-09-15": {}, "2026-09-16": {}, "2026-09-17": {}, "2026-09-18": {}, "2026-09-19": {}, "2026-09-20": {}, "2026-09-21": {}, "2026-09-22": {}, "2026-09-23": {}, "2026-09-24": {}, "2026-09-25": {}, "2026-09-26": {}, "2026-09-27": {}, "2026-09-28": {}, "2026-09-29": {}, "2026-09-30": {}, "2026-10-01": {}, "2026-10-02": {}, "2026-10-03": {}, "2026-10-04": {}, "2026-10-05": {}, "2026-10-06": {}, "2026-10-07": {}, "2026-10-08": {}, "2026-10-09": {}, "2026-10-10": {}, "2026-10-11": {}, "2026-10-12": {}, "2026-10-13": {}, "2026-10-14": {}, "2026-10-15": {}, "2026-10-16": {}, "2026-10-17": {}, "2026-10-18": {}, "2026-10-19": {}, "2026-10-20": {}, "2026-10-21": {}, "2026-10-22": {}, "2026-10-23": {}, "2026-10-24": {}, "2026-10-25": {}, "2026-10-26": {}, "2026-10-27": {}, "2026-10-28": {}, "2026-10-29": {}, "2026-10-30": {}, "2026-10-31": {}, "2026-11-01": {}, "2026-11-02": {}, "2026-11-03": {}, "2026-11-04": {}, "2026-11-05": {}, "2026-11-06": {}, "2026-11-07": {}, "2026-11-08": {}, "2026-11-09": {}, "2026-11-10": {}, "2026-11-11": {}, "2026-11-12": {}, "2026-11-13": {}, "2026-11-14": {}, "2026-11-15": {}, "2026-11-16": {}, "2026-11-17": {}, "2026-11-18": {}, "2026-11-19": {}, "2026-11-20": {}, "2026-11-21": {}, "2026-11-22": {}, "2026-11-23": {}, "2026-11-24": {}, "2026-11-25": {}, "2026-11-26": {}, "2026-11-27": {}, "2026-11-28": {}, "2026-11-29": {}, "2026-11-30": {}, "2026-12-01": {}, "2026-12-02": {}, "2026-12-03": {}, "2026-12-04": {}, "2026-12-05": {}, "2026-12-06": {}, "2026-12-07": {}, "2026-12-08": {}, "2026-12-09": {}, "2026-12-10": {}, "2026-12-11": {}, "2026-12-12": {}, "2026-12-13": {}, "2026-12-14": {}, "2026-12-15": {}, "2026-12-16": {}, "2026-12-17": {}, "2026-12-18": {}, "2026-12-19": {}, "2026-12-20": {}, "2026-12-21": {}, "2026-12-22": {}, "2026-12-23": {}, "2026-12-24": {}, "2026-12-25": {}, "2026-12-26": {}, "2026-12-27": {}, "2026-12-28": {}, "2026-12-29": {}, "2026-12-30": {}, "2026-12-31": {}, "2027-01-01": {}, "2027-01-02": {}, "2027-01-03": {}}
+;
+const LS_D='winit_db_v2', LS_C='winit_cfg_v2';
+let cfg={}, db={};
+
+function persist()    { try{localStorage.setItem(LS_D,JSON.stringify(db))}catch(e){} }
+function persistCfg() { try{localStorage.setItem(LS_C,JSON.stringify(cfg))}catch(e){} }
+function loadStorage(){
+  try{const d=localStorage.getItem(LS_D);if(d)db=JSON.parse(d);}catch(e){}
+  try{const c=localStorage.getItem(LS_C);if(c)cfg=JSON.parse(c);}catch(e){}
+  // Migrate from older key versions if current is empty
+  if(!Object.keys(db).length){
+    const oldKeys=['winit_db_v1','ht_db_v3','healthtracker_data'];
+    for(const k of oldKeys){
+      try{const d=localStorage.getItem(k);if(d){db=JSON.parse(d);persist();break;}}catch(e){}
+    }
+  }
+  if(!cfg.setup){
+    const oldCfgKeys=['winit_cfg_v1','ht_cfg_v3','healthtracker_cfg'];
+    for(const k of oldCfgKeys){
+      try{const c=localStorage.getItem(k);if(c){cfg=JSON.parse(c);persistCfg();break;}}catch(e){}
+    }
+  }
+}
+
+function today(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function yesterday(){ return addDays(today(),-1); }
+function addDays(iso,n){
+  const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getMonday(iso){
+  const d=new Date(iso+'T12:00:00'),day=d.getDay();
+  return addDays(iso,day===0?-6:1-day);
+}
+function fmt(n,dec=1){ return (n==null||isNaN(n))?'—':Number(n).toFixed(dec); }
+function fmtD(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function fmtDL(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
+function calcBMI(wt,ft,ins){ const h=ft*12+ins; return (wt/(h*h))*703; }
+
+function notice(msg,err=false){
+  const el=document.getElementById('notice');
+  el.textContent=msg; el.className='notice show'+(err?' err':'');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ── Splash / Nav ──────────────────────────────────────
+function startSetup(){
+  document.getElementById('splash').classList.remove('active');
+  document.getElementById('onboard').classList.add('active');
+  document.getElementById('ob-startdate').value=today();
+}
+function showApp(){
+  document.getElementById('splash').classList.remove('active');
+  document.getElementById('onboard').classList.remove('active');
+  document.getElementById('main-app').classList.add('active');
+  renderToday();
+  renderStreak();
+}
+function showSplash(){
+  document.getElementById('splash').classList.add('active');
+  document.getElementById('main-app').classList.remove('active');
+}
+
+// ── Onboarding ────────────────────────────────────────
+let obCurrentStep=1;
+function obNext(from){
+  if(from===1){
+    if(!document.getElementById('ob-name').value.trim()){alert('Please enter your name');return;}
+    const ft=parseFloat(document.getElementById('ob-ft').value);
+    if(!ft||isNaN(ft)){alert('Please enter your height');return;}
+  }
+  if(from===2){
+    if(!parseFloat(document.getElementById('ob-curr').value)){alert('Please enter your current weight');return;}
+    if(!parseFloat(document.getElementById('ob-goal').value)){alert('Please enter your goal weight');return;}
+    if(!document.getElementById('ob-goaldate').value){alert('Please enter weights and select a loss rate');return;}
+  }
+  document.getElementById(`ob-${from}`).classList.remove('active');
+  document.getElementById(`ob-${from+1}`).classList.add('active');
+  obCurrentStep=from+1;
+  document.getElementById('ob-back-btn').style.display=obCurrentStep>1?'block':'none';
+}
+function obBack(){
+  if(obCurrentStep<=1){
+    document.getElementById('onboard').classList.remove('active');
+    document.getElementById('splash').classList.add('active');
+    return;
+  }
+  document.getElementById(`ob-${obCurrentStep}`).classList.remove('active');
+  obCurrentStep--;
+  document.getElementById(`ob-${obCurrentStep}`).classList.add('active');
+  document.getElementById('ob-back-btn').style.display=obCurrentStep>1?'block':'none';
+}
+function calcGoalDate(){
+  const curr=parseFloat(document.getElementById('ob-curr').value);
+  const goal=parseFloat(document.getElementById('ob-goal').value);
+  const rate=parseFloat(document.getElementById('ob-rate').value);
+  const preview=document.getElementById('ob-goal-preview');
+  if(!curr||!goal||curr<=goal){preview.style.display='none';return;}
+  const weeks=Math.ceil((curr-goal)/rate);
+  const gd=new Date(); gd.setDate(gd.getDate()+weeks*7);
+  document.getElementById('ob-goaldate').value=gd.toISOString().split('T')[0];
+  document.getElementById('ob-goal-date-text').textContent=
+    '🎯 '+gd.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('ob-goal-weeks-text').textContent=
+    `${weeks} weeks at ${rate} lb/week`;
+  preview.style.display='block';
+}
+function obFinish(){
+  if(!parseInt(document.getElementById('ob-wkgoal').value)){alert('Please enter your weekly under goal');return;}
+  cfg={
+    setup:true,
+    name:     document.getElementById('ob-name').value.trim(),
+    heightFt: parseFloat(document.getElementById('ob-ft').value),
+    heightIn: parseFloat(document.getElementById('ob-in').value)||0,
+    startWt:  parseFloat(document.getElementById('ob-curr').value),
+    goalWt:   parseFloat(document.getElementById('ob-goal').value),
+    goalDate: document.getElementById('ob-goaldate').value,
+    lossRate: parseFloat(document.getElementById('ob-rate').value),
+    wkGoal:   parseInt(document.getElementById('ob-wkgoal').value),
+    startDate:document.getElementById('ob-startdate').value||today(),
+  };
+  const sd=cfg.startDate;
+  if(!db[sd])db[sd]={};
+  if(!db[sd].wt)db[sd].wt=cfg.startWt;
+  persistCfg(); persist();
+  showApp();
+}
+
+function toggleHelp(){
+  const body=document.getElementById('help-body');
+  const chev=document.getElementById('help-chevron');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  chev.textContent=open?'✕':'﹢';
+}
+
+
+function switchTab(name){
+  const names=['today','calendar','progress','settings'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));
+  if(name==='calendar')  renderCalendar();
+  if(name==='progress') renderProgress();
+  if(name==='settings') loadSettingsUI();
+}
+
+// ── Calendar ──────────────────────────────────────────
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-11
+
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function renderCalendar(){
+  const td = today();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${monthNames[calMonth]} ${calYear}`;
+  document.getElementById('cal-month-stats-label').textContent = `${monthNames[calMonth]} summary`;
+
+  // First day of month (0=Sun, need Mon-based)
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1; // Mon=0
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+
+  let html = '';
+
+  // Empty cells before first day (padding Mon-based)
+  for(let i=0;i<startOffset;i++){
+    html += `<div style="min-height:76px"></div>`;
+  }
+
+  let totalUnder=0, totalCals=0, calDays=0, firstWt=null, lastWt=null;
+  let wkCals=0, wkUnder=0, wkCalDays=0, wkFirstWt=null, wkLastWt=null;
+
+  // Find last known weight before this month to carry forward
+  let carryWt = null;
+  const sortedDates = Object.keys(db).sort();
+  const monthStart = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+  for(const d2 of sortedDates){
+    if(d2 >= monthStart) break;
+    if(db[d2] && db[d2].wt) carryWt = db[d2].wt;
+  }
+
+  function wkSummaryCell(){
+    const rawChange = wkFirstWt && wkLastWt ? +(wkFirstWt - wkLastWt).toFixed(1) : null;
+    const wkAvgCals = wkCalDays ? Math.round(wkCals / wkCalDays) : null;
+    const wkAvgUnder = wkCalDays ? Math.round(wkUnder / wkCalDays) : null;
+    const lostHtml = rawChange !== null && rawChange !== 0
+      ? `<div style="font-size:7px;color:var(--muted);line-height:1">lost</div><div style="font-size:11px;font-weight:800;color:${rawChange>0?'var(--green)':'var(--danger)'};margin-bottom:3px">▼${Math.abs(rawChange)}</div>`
+      : `<div style="font-size:9px;color:var(--muted);margin-bottom:3px">—</div>`;
+    const cell = `<div style="min-height:76px;border-radius:7px;padding:5px 3px;background:var(--bg3);border:1px solid var(--green-dark);display:flex;flex-direction:column;align-items:center;justify-content:center">
+      ${lostHtml}
+      ${wkAvgCals?`<div style="font-size:7px;color:var(--muted);line-height:1">avg cal</div><div style="font-size:9px;color:var(--text);font-weight:600">${wkAvgCals}</div>`:''}
+      ${wkAvgUnder?`<div style="font-size:7px;color:var(--muted);line-height:1;margin-top:2px">avg undr</div><div style="font-size:9px;color:var(--green);font-weight:600">${wkAvgUnder}</div>`:''}
+      ${wkUnder?`<div style="font-size:7px;color:var(--muted);line-height:1;margin-top:2px">total</div><div style="font-size:9px;font-weight:700;color:var(--green)">+${wkUnder}</div>`:''}
+    </div>`;
+    wkCals=0; wkUnder=0; wkCalDays=0; wkFirstWt=null; wkLastWt=null;
+    return cell;
+  }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const e = db[iso] || {};
+    const isToday = iso === td;
+    const isFuture = iso > td;
+    const hasData = !!(e.cals || e.under || e.wt);
+    const under = e.under || null;
+
+    const displayWt = e.wt || (!isFuture ? carryWt : null);
+    const wtIsCarried = !e.wt && displayWt !== null;
+    if(e.wt) carryWt = e.wt;
+
+    if(e.cals) { totalCals+=e.cals; calDays++; wkCals+=e.cals; wkCalDays++; }
+    if(e.under) { totalUnder+=e.under; wkUnder+=e.under; }
+    if(displayWt) {
+      if(!firstWt) firstWt=displayWt; lastWt=displayWt;
+      if(!wkFirstWt) wkFirstWt=displayWt; wkLastWt=displayWt;
+    }
+
+    let bg = 'var(--bg2)', border = 'var(--border)', numColor = 'var(--muted)';
+    if(isToday){ border='var(--green)'; numColor='var(--green)'; }
+    else if(!isFuture && hasData && under !== null){
+      bg = under > 0 ? 'var(--green-dim)' : '#fef2f2';
+      border = under > 0 ? 'var(--green-dark)' : '#fca5a5';
+      numColor = 'var(--text)';
+    } else if(!isFuture && hasData){
+      bg='var(--bg3)'; numColor='var(--text)';
+    }
+
+    html += `<div onclick="openEdit('${iso}')" style="min-height:76px;border-radius:7px;padding:5px 3px;background:${bg};border:1px solid ${border};display:flex;flex-direction:column;align-items:center;cursor:pointer;opacity:${isFuture?'0.2':'1'}">
+      <div style="font-size:13px;font-weight:700;color:${numColor};line-height:1.2;margin-bottom:2px">${d}</div>
+      ${displayWt?`<div style="font-size:8px;color:var(--muted);line-height:1">wt</div><div style="font-size:9px;font-weight:600;color:${wtIsCarried?'var(--muted)':'var(--text)'}">${displayWt}</div>`:''}
+      ${e.cals?`<div style="font-size:8px;color:var(--muted);line-height:1;margin-top:1px">cal</div><div style="font-size:9px;color:var(--text)">${e.cals}</div>`:''}
+      ${e.net?`<div style="font-size:8px;color:var(--muted);line-height:1;margin-top:1px">net</div><div style="font-size:9px;color:var(--text)">${e.net}</div>`:''}
+      ${e.under?`<div style="font-size:8px;color:var(--muted);line-height:1;margin-top:1px">undr</div><div style="font-size:9px;color:${under>0?'var(--green)':'var(--danger)'}">+${e.under}</div>`:''}
+    </div>`;
+
+    // Use actual day of week: 0=Sun,1=Mon...6=Sat
+    const dow = new Date(iso+'T12:00:00').getDay();
+    const isLastDay = d === daysInMonth;
+
+    if(dow === 0 || isLastDay){
+      // It's Sunday or end of month — inject WK summary
+      html += wkSummaryCell();
+      // If last day falls mid-week, pad remaining day cells then WK is already added
+    }
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+  document.getElementById('cal-month-under').textContent = totalUnder ? `+${totalUnder.toLocaleString()} under` : '';
+  document.getElementById('cal-days-logged').textContent = calDays || '—';
+  document.getElementById('cal-avg-cals').textContent = calDays ? Math.round(totalCals/calDays) : '—';
+  const wtChange = firstWt && lastWt ? (firstWt - lastWt).toFixed(1) : null;
+  const wtEl = document.getElementById('cal-wt-change');
+  if(wtChange !== null && wtChange !== 0){
+    wtEl.textContent = (wtChange > 0 ? '▼' : '▲') + Math.abs(wtChange);
+    wtEl.style.color = wtChange > 0 ? 'var(--green)' : 'var(--danger)';
+  } else { wtEl.textContent = '—'; }
+}
+
+// ── Today ─────────────────────────────────────────────
+function renderToday(){
+  const td=today(), yd=yesterday();
+  document.getElementById('today-label').textContent=
+    'Log — '+new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  const etd=db[td]||{}, eyd=db[yd]||{};
+  document.getElementById('s-cals').textContent  = eyd.cals  ||'—';
+  document.getElementById('s-net').textContent   = eyd.net   ||'—';
+  document.getElementById('s-under').textContent = eyd.under ||'—';
+  document.getElementById('s-wt').textContent    = etd.wt    ?fmt(etd.wt):'—';
+
+  // Days to goal hero
+  const allDates=Object.keys(db).sort();
+  let currWt2=null; const wtH2=[];
+  for(const d2 of allDates){if(db[d2]&&db[d2].wt){currWt2=db[d2].wt;wtH2.push({date:d2,wt:db[d2].wt});}}
+  let daysLeft2=null, projDate2=null;
+  if(wtH2.length>=2){
+    const f2=wtH2[0], l2=wtH2[wtH2.length-1];
+    const days2=Math.max(1,(new Date(l2.date)-new Date(f2.date))/86400000);
+    const rate2=(f2.wt-l2.wt)/days2;
+    const togo2=Math.max(0,(currWt2||0)-(cfg.goalWt||0));
+    if(rate2>0){daysLeft2=Math.round(togo2/rate2);projDate2=new Date();projDate2.setDate(projDate2.getDate()+daysLeft2);}
+  }
+  if(!projDate2&&cfg.goalDate){
+    projDate2=new Date(cfg.goalDate+'T12:00:00');
+    daysLeft2=Math.round((projDate2-new Date())/86400000);
+  }
+  if(daysLeft2!==null&&daysLeft2>0){
+    document.getElementById('hero-days').textContent=daysLeft2;
+    document.getElementById('hero-goaldate').textContent=
+      projDate2.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  } else if(daysLeft2<=0){
+    document.getElementById('hero-days').textContent='🎉';
+    document.getElementById('hero-goaldate').textContent='Goal reached!';
+  } else {
+    document.getElementById('hero-days').textContent='—';
+    document.getElementById('hero-goaldate').textContent='Complete setup to see your goal date';
+  }
+
+  // Weekly bar — driven by cals under budget
+  const mon=getMonday(td); let tot=0;
+  for(let i=0;i<7;i++){const x=db[addDays(mon,i)];if(x&&x.under)tot+=x.under;}
+  const goal=cfg.wkGoal||5000;
+  const pct=Math.min(100,Math.max(0,Math.round(tot/goal*100)));
+  document.getElementById('wk-nums').textContent=`${tot.toLocaleString()} / ${goal.toLocaleString()}`;
+  document.getElementById('wk-goal-lbl').textContent=`Goal: ${goal.toLocaleString()}`;
+  const bar=document.getElementById('wk-bar');
+  bar.style.width=pct+'%';
+  bar.className='bar-fill'+(pct>=100?'':pct>60?' warn':' bad');
+}
+function saveToday(){
+  const cals  =parseFloat(document.getElementById('in-cals').value)  ||null;
+  const net   =parseFloat(document.getElementById('in-net').value)   ||null;
+  const under =parseFloat(document.getElementById('in-under').value) ||null;
+  const wt    =parseFloat(document.getElementById('in-wt').value)    ||null;
+  if(!cals&&!net&&!under&&!wt){notice('Enter at least one value',true);return;}
+  const td=today(), yd=yesterday();
+  if(wt)                { db[td]={...(db[td]||{}),wt}; }
+  if(cals||net||under)  { db[yd]={...(db[yd]||{}),...(cals?{cals}:{}),...(net?{net}:{}),...(under?{under}:{})}; }
+  persist();
+  ['in-cals','in-net','in-under','in-wt'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  setTimeout(()=>{
+    renderToday();
+    renderStreak();
+    showMotivation();
+    const calView = document.getElementById('view-calendar');
+    if(calView && calView.classList.contains('active')) renderCalendar();
+  }, 50);
+}
+
+// ── Motivation modal ──────────────────────────────────
+function showMotivation(){
+  const dates=Object.keys(db).sort();
+  let currWt=null; const wtH=[];
+  for(const d of dates){if(db[d]&&db[d].wt){currWt=db[d].wt;wtH.push({date:d,wt:db[d].wt});}}
+  if(!currWt) currWt=cfg.startWt||0;
+
+  const lost=+((cfg.startWt||currWt)-currWt).toFixed(1);
+  const togo=Math.max(0,currWt-(cfg.goalWt||0));
+  const totalToLose=(cfg.startWt||currWt)-(cfg.goalWt||0);
+  const pctDone=totalToLose>0?Math.min(99,Math.round(Math.max(0,lost)/totalToLose*100)):0;
+
+  // Figure out projected date — use actual pace if possible, else fall back to cfg.goalDate
+  let daysLeft=null, projDate=null, usingActualPace=false;
+  if(wtH.length>=2){
+    const f=wtH[0], l=wtH[wtH.length-1];
+    const days=Math.max(1,(new Date(l.date)-new Date(f.date))/86400000);
+    const rate=(f.wt-l.wt)/days;
+    if(rate>0){
+      daysLeft=Math.round(togo/rate);
+      projDate=new Date(); projDate.setDate(projDate.getDate()+daysLeft);
+      usingActualPace=true;
+    }
+  }
+  // Fall back to cfg.goalDate if no pace data
+  if(!projDate&&cfg.goalDate){
+    projDate=new Date(cfg.goalDate+'T12:00:00');
+    const now=new Date();
+    daysLeft=Math.round((projDate-now)/86400000);
+  }
+
+  // Format time remaining
+  let timeStr='', dateStr='';
+  if(projDate){
+    dateStr=projDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    if(daysLeft<=0){
+      timeStr='Goal date reached!';
+    } else if(daysLeft<14){
+      timeStr=`${daysLeft} day${daysLeft===1?'':'s'}`;
+    } else if(daysLeft<60){
+      const weeks=Math.round(daysLeft/7);
+      timeStr=`${weeks} week${weeks===1?'':'s'}`;
+    } else {
+      const months=Math.round(daysLeft/30.4);
+      timeStr=`${months} month${months===1?'':'s'}`;
+    }
+  }
+
+  const messages=[
+    {min:0,  max:10, emoji:'🌱', stmt:'Every single day adds up.',              sub:'You\'re building a habit that will change your life. Keep going.'},
+    {min:10, max:25, emoji:'💪', stmt:'You\'re finding your groove.',            sub:'The hardest part is the beginning — and you\'re already past it.'},
+    {min:25, max:40, emoji:'🔥', stmt:'A quarter of the way there. Already.',   sub:'Most people quit before this point. You didn\'t. That means something.'},
+    {min:40, max:55, emoji:'⚡', stmt:'Almost halfway. You\'re doing this.',     sub:'Look how far you\'ve come. The person who started didn\'t know you had this in you.'},
+    {min:55, max:70, emoji:'🚀', stmt:'Past the halfway mark. No turning back.',sub:'You\'ve lost more than you have left to lose. The finish line is closer than the start.'},
+    {min:70, max:85, emoji:'🏃', stmt:'The end is in sight.',                    sub:'You\'ve done the hard work. Now you finish it.'},
+    {min:85, max:99, emoji:'🏆', stmt:'Almost there. Don\'t stop now.',          sub:'You are so close. Every day you show up is a day you can\'t get back. Make it count.'},
+    {min:99, max:999,emoji:'🎉', stmt:'You did it.',                             sub:'You hit your goal. Take a moment to recognize what that took.'},
+  ];
+  const msg=messages.find(m=>pctDone>=m.min&&pctDone<m.max)||messages[0];
+
+  document.getElementById('motiv-emoji').textContent=msg.emoji;
+  document.getElementById('motiv-statement').textContent=msg.stmt;
+  document.getElementById('motiv-sub').textContent=msg.sub;
+
+  if(projDate&&timeStr){
+    // Seasonal/event context
+    const month=projDate.getMonth(); // 0-11
+    const day=projDate.getDate();
+    const events=[
+      {m:0,  label:'This is your year. Not a resolution — a result.'},
+      {m:1,  label:'Imagine how you\'ll feel on Valentine\'s Day knowing you showed up for yourself every single day to get there.'},
+      {m:2,  label:'Spring is right around the corner. You\'ll walk into it a different person.'},
+      {m:3,  label:'Spring in full swing — and so are you. New season, new you.'},
+      {m:4,  label:'The world is waking up. So are you. And people are going to notice.'},
+      {m:5,  label:'Summer doesn\'t start in June. It started the day you decided to do this. People are going to do a double take.'},
+      {m:6,  label:'Fourth of July. Fireworks, sun, and a version of you that did the work.'},
+      {m:7,  label:'Peak summer. You\'ll have earned every single moment of it — and everyone around you is going to see it.'},
+      {m:8,  label:'Football season. Tailgates, friends, fall air — and you showing up as your best self.'},
+      {m:9,  label:'Halloween. Every costume looks better when you feel this good.'},
+      {m:10, label:'Thanksgiving. You\'ll have so much more to be grateful for than you realize right now.'},
+      {m:11, label:(day<=15?'The holidays are coming. You\'ll walk into every party owning the room.':'Christmas morning. Best gift you ever gave yourself.')},
+    ];
+    const event=events[month].label;
+    const dateStr2=projDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+    document.getElementById('motiv-days').textContent=dateStr2;
+    document.getElementById('motiv-days-label').textContent=
+      usingActualPace?'at your current pace':'based on your goal';
+    document.getElementById('motiv-statement').textContent=`You're doing great, ${cfg.name||'friend'}!`;
+    document.getElementById('motiv-sub').textContent=
+      `That's ${timeStr} from now. ${event}`;
+  } else {
+    document.getElementById('motiv-days').textContent=lost>0?`-${lost} lbs`:'📊';
+    document.getElementById('motiv-days-label').textContent=lost>0?'lost so far':'Log your weight to see your projection';
+  }
+
+  document.getElementById('motiv-modal').classList.add('open');
+}
+
+// ── Streak ────────────────────────────────────────────
+function renderStreak(){
+  let streak=0, d=yesterday();
+  while(db[d]&&(db[d].cals||db[d].under||db[d].wt)){streak++;d=addDays(d,-1);}
+  const el=document.getElementById('streak-display');
+  if(streak>=2) el.innerHTML=`🔥 ${streak} day streak`;
+  else el.textContent='';
+}
+
+// ── Screenshot text parser ────────────────────────────
+function parsePastedText(text){
+  if(!text || text.length < 3) return;
+  const statusEl = document.getElementById('scan-status');
+
+  const lines = text.split(/[\n\r]+/).map(l=>l.trim()).filter(Boolean);
+  let cals=null, net=null, under=null;
+
+  for(let i=0;i<lines.length;i++){
+    const line  = lines[i];
+    const lower = line.toLowerCase();
+    // Get number from this line or next line
+    const numHere = line.match(/[\d,]+/);
+    const numNext = lines[i+1] ? lines[i+1].match(/[\d,]+/) : null;
+    const n  = numHere ? parseInt(numHere[0].replace(/,/g,'')) : null;
+    const nn = numNext ? parseInt(numNext[0].replace(/,/g,'')) : null;
+
+    const pick = (v) => (v && v > 0 && v < 6000) ? v : null;
+
+    if(lower.includes('food calorie') || lower.includes('consumed')){
+      cals = pick(n) || pick(nn);
+    }
+    if(lower.includes('net calorie')){
+      net = pick(n) || pick(nn);
+    }
+    if(lower.includes('under budget') || lower === 'under'){
+      under = pick(n) || pick(nn);
+    }
+    // "Under" as a standalone big number often appears right after the word "Under"
+    if(lower === 'under' && nn) under = pick(nn);
+  }
+
+  // Fallback: pull all 3-4 digit numbers if we got nothing
+  if(!cals && !net && !under){
+    const allNums = [...text.matchAll(/\b(\d{3,4})\b/g)].map(m=>parseInt(m[1])).filter(n=>n>100&&n<5000);
+    if(allNums.length >= 1) cals  = allNums[0];
+    if(allNums.length >= 2) net   = allNums[1];
+    if(allNums.length >= 3) under = allNums[2];
+  }
+
+  let found = [];
+  if(cals)  { document.getElementById('in-cals').value  = cals;  found.push('cals'); }
+  if(net)   { document.getElementById('in-net').value   = net;   found.push('net'); }
+  if(under) { document.getElementById('in-under').value = under; found.push('under'); }
+
+  statusEl.style.display='block';
+  if(found.length){
+    statusEl.style.background='#eef2ff'; statusEl.style.color='#4338ca';
+    statusEl.textContent=`✅ Got ${found.join(', ')} — check the numbers then hit Save`;
+    // Clear the textarea
+    setTimeout(()=>{ document.getElementById('scan-paste').value=''; },1000);
+  } else {
+    statusEl.style.background='#fef2f2'; statusEl.style.color='#ef4444';
+    statusEl.textContent='Couldn\'t find numbers — try copying just the numbers from LoseIt';
+  }
+}
+
+
+let editingDate = null;
+
+function openEdit(dateStr){
+  editingDate = dateStr;
+  const e = db[dateStr] || {};
+  const d = new Date(dateStr + 'T12:00:00');
+  document.getElementById('edit-date-label').textContent =
+    d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('edit-cals').value  = e.cals  || '';
+  document.getElementById('edit-net').value   = e.net   || '';
+  document.getElementById('edit-under').value = e.under || '';
+  document.getElementById('edit-wt').value    = e.wt    || '';
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEdit(e){
+  if(e && e.target !== document.getElementById('edit-modal')) return;
+  document.getElementById('edit-modal').classList.remove('open');
+  editingDate = null;
+}
+
+function saveEdit(){
+  if(!editingDate) return;
+  const cals  = parseFloat(document.getElementById('edit-cals').value)  || null;
+  const net   = parseFloat(document.getElementById('edit-net').value)   || null;
+  const under = parseFloat(document.getElementById('edit-under').value) || null;
+  const wt    = parseFloat(document.getElementById('edit-wt').value)    || null;
+  db[editingDate] = { ...(db[editingDate]||{}),
+    ...(cals  !== null ? {cals}  : {cals:undefined}),
+    ...(net   !== null ? {net}   : {net:undefined}),
+    ...(under !== null ? {under} : {under:undefined}),
+    ...(wt    !== null ? {wt}    : {wt:undefined}),
+  };
+  // Clean up undefined keys
+  Object.keys(db[editingDate]).forEach(k => {
+    if(db[editingDate][k] === undefined) delete db[editingDate][k];
+  });
+  persist();
+  document.getElementById('edit-modal').classList.remove('open');
+  editingDate = null;
+  setTimeout(()=>{ renderCalendar(); renderToday(); }, 50);
+  notice('Entry updated!');
+}
+
+
+function renderHistory(){
+  const td=today(), startMon=getMonday(cfg.startDate||today()), todayMon=getMonday(td);
+  let html='', grandUnder=0, cursor=startMon;
+  while(cursor<=addDays(todayMon,6)){
+    const wEnd=addDays(cursor,6), isCur=cursor===todayMon;
+    let wUnder=0, wCals=0, calDays=0, firstWt=null, lastWt=null, cells='';
+    for(let i=0;i<7;i++){
+      const d=addDays(cursor,i), e=db[d]||{}, isT=d===td, isFu=d>td;
+      const und=e.under!=null?e.under:null;
+      let cls='day-cell';
+      if(isT)cls+=' today';
+      if(!isFu&&und!=null)cls+=und>0?' good':' bad';
+      if(isFu)cls+=' future';
+      if(e.cals){wCals+=e.cals;calDays++;}
+      if(e.under){wUnder+=e.under;grandUnder+=e.under;}
+      if(e.wt){if(!firstWt)firstWt=e.wt;lastWt=e.wt;}
+      const dayL=['M','T','W','T','F','S','S'][i];
+      const dateNum = new Date(d+'T12:00:00').getDate();
+      cells+=`<div class="${cls}" onclick="openEdit('${d}')" style="justify-content:flex-start;padding:5px 3px;gap:0">
+        <div style="font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:1px">${dayL}</div>
+        <div style="font-size:15px;font-weight:800;color:${isT?'var(--green)':'var(--text)'};line-height:1;margin-bottom:4px">${dateNum}</div>
+        <div style="width:100%;height:1px;background:var(--border);margin-bottom:4px"></div>
+        <div class="d-wt">${e.wt?fmt(e.wt)+'<span style="font-size:8px;color:var(--muted);margin-left:1px">lb</span>':''}</div>
+        <div class="d-cal">${e.cals?e.cals+'<span style="font-size:8px;color:var(--muted)">c</span>':''}</div>
+        <div class="d-und" style="color:${und==null?'transparent':und>0?'var(--green)':'var(--danger)'}">${und!=null?(und>0?'+':'')+und+'<span style="font-size:8px">u</span>':''}</div>
+      </div>`;
+    }
+    const wtCh=firstWt&&lastWt?(firstWt-lastWt).toFixed(1):null;
+    const goal=cfg.wkGoal||5000;
+    const met=wUnder>=goal;
+    html+=`<div style="border:${isCur?'1.5px solid var(--green)':'1px solid var(--border)'};border-radius:10px;padding:10px;margin-bottom:10px;background:${isCur?'var(--bg3)':'var(--bg2)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:${isCur?'var(--text)':'var(--muted)'}">${fmtD(cursor)} – ${fmtD(wEnd)}</span>
+        <span style="font-size:12px;font-weight:700;color:${met?'var(--green)':'var(--muted)'}">${wUnder?'+'+wUnder.toLocaleString()+' under budget'+(met?' ✓':''):''}</span>
+      </div>
+      <div class="week-grid">${cells}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted)">
+        <span>${calDays?'Avg '+Math.round(wCals/calDays)+' cal/day':''}</span>
+        <span style="color:${wtCh>0?'var(--green)':'var(--muted)'}">${wtCh!==null&&wtCh!==0?(wtCh>0?'▼':'▲')+Math.abs(wtCh)+' lbs':''}</span>
+      </div>
+    </div>`;
+    cursor=addDays(cursor,7);
+  }
+  document.getElementById('all-weeks').innerHTML=html||'<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No data yet.<br>Start logging in Today.</p>';
+  document.getElementById('all-totals').textContent=grandUnder?grandUnder.toLocaleString()+' total under budget':'';
+  setTimeout(()=>{const el=document.querySelector('[style*="1.5px solid var(--green)"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);
+}
+
+// ── Progress ──────────────────────────────────────────
+function renderProgress(){
+  const dates=Object.keys(db).sort();
+  let currWt=null; const wtH=[];
+  for(const d of dates){if(db[d]&&db[d].wt){currWt=db[d].wt;wtH.push({date:d,wt:db[d].wt});}}
+  if(!currWt)currWt=cfg.startWt||0;
+  const startWt=cfg.startWt||currWt, goalWt=cfg.goalWt||0;
+  const lost=+(startWt-currWt).toFixed(1);
+  const ttl=startWt-goalWt;
+  const togo=Math.max(0,+(currWt-goalWt).toFixed(1));
+  const pct=ttl>0?Math.min(100,Math.round(Math.max(0,lost)/ttl*100)):0;
+  document.getElementById('p-lost').textContent=lost>0?lost:'0';
+  document.getElementById('p-curr').textContent=fmt(currWt);
+  document.getElementById('p-togo').textContent=togo;
+  document.getElementById('p-s-lbl').textContent=startWt+' lbs';
+  document.getElementById('p-g-lbl').textContent=goalWt+' lbs';
+  document.getElementById('p-pct').textContent=pct+'%';
+  document.getElementById('p-bar').style.width=pct+'%';
+  document.getElementById('p-goaldate').textContent=cfg.goalDate?fmtDL(cfg.goalDate):'—';
+
+  let projected='—', avgLoss='—';
+  if(wtH.length>=2){
+    const f=wtH[0], l=wtH[wtH.length-1];
+    const days=Math.max(1,(new Date(l.date)-new Date(f.date))/86400000);
+    const rate=(f.wt-l.wt)/days;
+    const weeklyRate=(rate*7).toFixed(1);
+    avgLoss=weeklyRate>0?weeklyRate+' lbs/week':'—';
+    if(rate>0){
+      const proj=new Date(); proj.setDate(proj.getDate()+Math.round(togo/rate));
+      projected=proj.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+  }
+  document.getElementById('p-projected').textContent=projected;
+  document.getElementById('p-avg-loss').textContent=avgLoss;
+
+  // BMI
+  const ft=cfg.heightFt, ins=cfg.heightIn||0;
+  if(ft&&currWt){
+    const b=calcBMI(currWt,ft,ins);
+    document.getElementById('bmi-val').textContent=b.toFixed(1);
+    let cat,cls;
+    if(b<18.5){cat='Underweight';cls='under';}
+    else if(b<25){cat='Normal';cls='normal';}
+    else if(b<30){cat='Overweight';cls='over';}
+    else{cat='Obese';cls='obese';}
+    document.getElementById('bmi-badge').innerHTML=`<span class="bmi-badge ${cls}">${cat}</span>`;
+    const needlePct=Math.min(100,Math.max(0,(b-15)/30*100));
+    document.getElementById('bmi-needle').style.left=needlePct+'%';
+    const totalIn=ft*12+ins;
+    const loH=Math.round(18.5*totalIn*totalIn/703);
+    const hiH=Math.round(24.9*totalIn*totalIn/703);
+    document.getElementById('bmi-healthy').textContent=`${loH}–${hiH} lbs`;
+    document.getElementById('bmi-at-goal').textContent=calcBMI(goalWt,ft,ins).toFixed(1);
+  }
+
+  const recent=wtH.slice(-10).reverse();
+  document.getElementById('weight-hist').innerHTML=recent.length
+    ?recent.map(r=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--muted)">${fmtD(r.date)}</span><span style="font-weight:600">${fmt(r.wt)} lbs</span></div>`).join('')
+    :'<span style="color:var(--muted);font-size:13px">No weight entries yet</span>';
+}
+
+// ── Settings ──────────────────────────────────────────
+function loadSettingsUI(){
+  document.getElementById('set-name').value     =cfg.name     ||'';
+  document.getElementById('set-ft').value       =cfg.heightFt ||'';
+  document.getElementById('set-in').value       =cfg.heightIn ||'';
+  document.getElementById('set-start').value    =cfg.startWt  ||'';
+  document.getElementById('set-goal').value     =cfg.goalWt   ||'';
+  document.getElementById('set-goaldate').value =cfg.goalDate ||'';
+  document.getElementById('set-wkgoal').value   =cfg.wkGoal   ||'';
+  document.getElementById('set-startdate').value=cfg.startDate||'';
+}
+function saveSettings(){
+  cfg.name      =document.getElementById('set-name').value.trim()       ||cfg.name;
+  cfg.heightFt  =parseFloat(document.getElementById('set-ft').value)    ||cfg.heightFt;
+  cfg.heightIn  =parseFloat(document.getElementById('set-in').value)    ||cfg.heightIn;
+  cfg.startWt   =parseFloat(document.getElementById('set-start').value) ||cfg.startWt;
+  cfg.goalWt    =parseFloat(document.getElementById('set-goal').value)  ||cfg.goalWt;
+  cfg.goalDate  =document.getElementById('set-goaldate').value          ||cfg.goalDate;
+  cfg.wkGoal    =parseInt(document.getElementById('set-wkgoal').value)  ||cfg.wkGoal;
+  cfg.startDate =document.getElementById('set-startdate').value         ||cfg.startDate;
+  persistCfg(); notice('Settings saved!'); renderToday();
+}
+function importSpreadsheet(){
+  if(!confirm('This will import all data from your 2026 health spreadsheet. Existing entries will be kept — only missing ones will be filled in. Continue?')) return;
+  let added=0;
+  for(const [date, entry] of Object.entries(SPREADSHEET_DATA)){
+    if(!entry.wt && !entry.cals && !entry.under) continue; // skip empty future entries
+    if(!db[date]) db[date]={};
+    if(entry.wt    && !db[date].wt)    { db[date].wt    = entry.wt; }
+    if(entry.cals  && !db[date].cals)  { db[date].cals  = entry.cals; }
+    if(entry.under && !db[date].under) { db[date].under = entry.under; }
+    added++;
+  }
+  persist();
+  // Switch to History tab so they can see it worked
+  switchTab('calendar');
+  // Show a prominent success message
+  setTimeout(()=>{
+    alert(`✅ Done! ${added} days of data imported from your spreadsheet. Check the History tab — it\'s all there.`);
+  }, 300);
+}
+
+function importBackup(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      if(data.db){
+        let count=0;
+        for(const [date, entry] of Object.entries(data.db)){
+          if(!db[date]) db[date]={};
+          Object.assign(db[date], entry);
+          count++;
+        }
+        persist();
+        if(data.cfg){ cfg={...cfg,...data.cfg}; persistCfg(); loadSettingsUI(); }
+        notice(`Backup imported! ${count} days restored.`);
+        renderToday();
+      } else {
+        notice('Invalid backup file', true);
+      }
+    } catch(err){ notice('Could not read file — make sure it\'s a WinIt backup JSON', true); }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({cfg,db},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='winit_backup.json'; a.click();
+}
+function resetAll(){
+  if(!confirm('Delete ALL data and start over?'))return;
+  localStorage.removeItem(LS_D); localStorage.removeItem(LS_C);
+  db={}; cfg={};
+  ['in-cals','in-net','in-under','in-wt'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ob-1').classList.add('active');
+  obCurrentStep=1;
+  document.getElementById('ob-back-btn').style.display='none';
+  document.getElementById('main-app').classList.remove('active');
+  document.getElementById('splash').classList.add('active');
+}
+
+// ── Tip jar & share ───────────────────────────────────
+function openTip(){
+  window.open('https://buymeacoffee.com','_blank');
+}
+function shareApp(){
+  if(navigator.share){
+    navigator.share({
+      title:'WinIt',
+      text:'I\'ve been using WinIt to track my weekly net calories and weight loss goals — it gives you full credit for exercise, and tells you exactly when you\'ll hit your goal weight.',
+      url:window.location.href
+    });
+  } else {
+    navigator.clipboard&&navigator.clipboard.writeText(window.location.href);
+    notice('Link copied to clipboard!');
+  }
+}
+
+// ── PWA ───────────────────────────────────────────────
+(function(){
+  const c=document.createElement('canvas'); c.width=180;c.height=180;
+  const x=c.getContext('2d');
+  x.fillStyle='#eef0f4'; x.beginPath(); x.roundRect(0,0,180,180,36); x.fill();
+  x.fillStyle='#6366f1'; x.font='bold 46px system-ui'; x.textAlign='center'; x.textBaseline='middle';
+  x.fillText('Win',68,90);
+  x.fillStyle='#f4f6f9'; x.font='bold 46px system-ui';
+  x.fillText('It',128,90);
+  const icon=c.toDataURL('image/png');
+  const l1=document.createElement('link'); l1.rel='apple-touch-icon'; l1.href=icon; document.head.appendChild(l1);
+  const mf={name:'WinIt',short_name:'WinIt',start_url:'.',display:'standalone',background_color:'#eef0f4',theme_color:'#eef0f4',icons:[{src:icon,sizes:'180x180',type:'image/png'}]};
+  const l2=document.createElement('link'); l2.rel='manifest'; l2.href='data:application/manifest+json,'+encodeURIComponent(JSON.stringify(mf)); document.head.appendChild(l2);
+  if('serviceWorker' in navigator){
+    // Inline SW via data URL fallback — blob URLs blocked on some hosts
+    try {
+      navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    } catch(e){}
+  }
+})();
+
+// ── Init ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  loadStorage();
+  if(cfg.setup){ showApp(); } else { document.getElementById('splash').classList.add('active'); }
+});
+</script>
+</body>
+</html>
